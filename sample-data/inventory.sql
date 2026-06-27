@@ -1,27 +1,40 @@
-CREATE DATABASE IF NOT EXISTS inventory_system;
-USE inventory_system;
+CREATE DATABASE IF NOT EXISTS inventory_db;
+USE inventory_db;
 
+-- ─── Users ───────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(100) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- ─── Warehouses ──────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS warehouses (
     warehouse_id INT PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     location VARCHAR(255)
 );
 
+-- ─── Suppliers ───────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS suppliers (
     supplier_id VARCHAR(50) PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     phone_no VARCHAR(20)
 );
 
+-- ─── Products ────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS products (
     product_id VARCHAR(50) PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     qty INT NOT NULL DEFAULT 0,
     price DECIMAL(10, 2) NOT NULL,
     warehouse_id INT,
-    FOREIGN KEY (warehouse_id) REFERENCES warehouses(warehouse_id)
+    INDEX (warehouse_id),
+    FOREIGN KEY (warehouse_id) REFERENCES warehouses(warehouse_id) ON DELETE NO ACTION ON UPDATE NO ACTION
 );
 
+-- ─── Purchase Orders ────────────────────────────────────
 CREATE TABLE IF NOT EXISTS purchase_orders (
     po_id INT AUTO_INCREMENT PRIMARY KEY,
     product_id VARCHAR(50),
@@ -29,10 +42,13 @@ CREATE TABLE IF NOT EXISTS purchase_orders (
     qty_req INT NOT NULL,
     price DECIMAL(10, 2),
     order_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (product_id) REFERENCES products(product_id),
-    FOREIGN KEY (supplier_id) REFERENCES suppliers(supplier_id)
+    INDEX (product_id),
+    INDEX (supplier_id),
+    FOREIGN KEY (product_id) REFERENCES products(product_id) ON DELETE NO ACTION ON UPDATE NO ACTION,
+    FOREIGN KEY (supplier_id) REFERENCES suppliers(supplier_id) ON DELETE NO ACTION ON UPDATE NO ACTION
 );
 
+-- ─── Sales Orders ───────────────────────────────────────
 CREATE TABLE IF NOT EXISTS sales_orders (
     so_id INT AUTO_INCREMENT PRIMARY KEY,
     product_id VARCHAR(50),
@@ -40,8 +56,10 @@ CREATE TABLE IF NOT EXISTS sales_orders (
     qty INT NOT NULL,
     price DECIMAL(10, 2) NOT NULL,
     sale_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (product_id) REFERENCES products(product_id),
-    FOREIGN KEY (supplier_id) REFERENCES suppliers(supplier_id)
+    INDEX (product_id),
+    INDEX (supplier_id),
+    FOREIGN KEY (product_id) REFERENCES products(product_id) ON DELETE NO ACTION ON UPDATE NO ACTION,
+    FOREIGN KEY (supplier_id) REFERENCES suppliers(supplier_id) ON DELETE NO ACTION ON UPDATE NO ACTION
 );
 
 -- WAREHOUSES (500)
