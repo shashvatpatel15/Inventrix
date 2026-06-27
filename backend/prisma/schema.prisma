@@ -1,0 +1,70 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+model products {
+  product_id      String            @id @db.VarChar(50)
+  name            String            @db.VarChar(255)
+  qty             Int               @default(0)
+  price           Decimal           @db.Decimal(10, 2)
+  warehouse_id    Int?
+  warehouses      warehouses?       @relation(fields: [warehouse_id], references: [warehouse_id], onDelete: NoAction, onUpdate: NoAction, map: "products_ibfk_1")
+  purchase_orders purchase_orders[]
+  sales_orders    sales_orders[]
+
+  @@index([warehouse_id], map: "warehouse_id")
+}
+
+model purchase_orders {
+  po_id       Int        @id @default(autoincrement())
+  product_id  String?    @db.VarChar(50)
+  supplier_id String?    @db.VarChar(50)
+  qty_req     Int
+  price       Decimal?   @db.Decimal(10, 2)
+  order_date  DateTime?  @default(now()) @db.Timestamp(0)
+  products    products?  @relation(fields: [product_id], references: [product_id], onDelete: NoAction, onUpdate: NoAction, map: "purchase_orders_ibfk_1")
+  suppliers   suppliers? @relation(fields: [supplier_id], references: [supplier_id], onDelete: NoAction, onUpdate: NoAction, map: "purchase_orders_ibfk_2")
+
+  @@index([product_id], map: "product_id")
+  @@index([supplier_id], map: "supplier_id")
+}
+
+model sales_orders {
+  so_id       Int        @id @default(autoincrement())
+  product_id  String?    @db.VarChar(50)
+  supplier_id String?    @db.VarChar(50)
+  qty         Int
+  price       Decimal    @db.Decimal(10, 2)
+  sale_date   DateTime?  @default(now()) @db.Timestamp(0)
+  products    products?  @relation(fields: [product_id], references: [product_id], onDelete: NoAction, onUpdate: NoAction, map: "sales_orders_ibfk_1")
+  suppliers   suppliers? @relation(fields: [supplier_id], references: [supplier_id], onDelete: NoAction, onUpdate: NoAction, map: "sales_orders_ibfk_2")
+
+  @@index([product_id], map: "product_id")
+  @@index([supplier_id], map: "supplier_id")
+}
+
+model suppliers {
+  supplier_id     String            @id @db.VarChar(50)
+  name            String            @db.VarChar(255)
+  phone_no        String?           @db.VarChar(20)
+  purchase_orders purchase_orders[]
+  sales_orders    sales_orders[]
+}
+
+model users {
+  id         Int       @id @default(autoincrement())
+  username   String    @unique(map: "username") @db.VarChar(100)
+  password   String    @db.VarChar(255)
+  created_at DateTime? @default(now()) @db.Timestamp(0)
+}
+
+model warehouses {
+  warehouse_id Int        @id
+  name         String     @db.VarChar(255)
+  location     String?    @db.VarChar(255)
+  products     products[]
+}
