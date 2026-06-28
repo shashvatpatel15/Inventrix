@@ -15,6 +15,11 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(express.json());
 
+// Root route for health checks
+app.get('/', (req, res) => {
+    res.status(200).json({ status: 'OK', message: 'Inventrix Backend API is running' });
+});
+
 // API Routes
 app.use('/api', apiRouter);
 
